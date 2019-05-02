@@ -2,7 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- SOS: if disabled, the item is shown but does nothing -->
     <item
         android:id="@+id/action_locate"
         android:enabled="false"

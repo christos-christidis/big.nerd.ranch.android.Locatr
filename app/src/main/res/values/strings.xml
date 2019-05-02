@@ -2,4 +2,6 @@
     <string name="app_name">Locatr</string>
     <string name="search">Find an image near you</string>
     <string name="image_near_you">image near you</string>
+    <string name="rationale_title">Why we need the location:</string>
+    <string name="rationale">Locatr uses location data to find images near you on Flickr</string>
 </resources>

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +32,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-public class LocatrFragment extends Fragment {
+public class LocatrFragment extends Fragment implements RationaleDialogFragment.Callbacks {
 
     private static final String LOG_TAG = "LocatrFragment";
 
@@ -40,6 +41,8 @@ public class LocatrFragment extends Fragment {
             Manifest.permission.ACCESS_COARSE_LOCATION
     };
     private static final int LOCATION_PERMISSIONS_REQUEST_CODE = 0;
+
+    private static final String RATIONALE_DIALOG_FRAGMENT_TAG = "rationale_dialog";
 
     private ImageView mImageView;
     private GoogleApiClient mClient;
@@ -60,7 +63,6 @@ public class LocatrFragment extends Fragment {
                     @Override
                     public void onConnected(@Nullable Bundle bundle) {
                         assert getActivity() != null;
-                        // SOS: now menu item will be enabled
                         getActivity().invalidateOptionsMenu();
                     }
 
@@ -75,7 +77,6 @@ public class LocatrFragment extends Fragment {
     public void onStart() {
         super.onStart();
         assert getActivity() != null;
-        // SOS: this is not instant, the cmd is passed to the looper and handled later by a handler
         getActivity().invalidateOptionsMenu();
         mClient.connect();
     }
@@ -111,7 +112,16 @@ public class LocatrFragment extends Fragment {
             if (hasLocationPermission()) {
                 findImage();
             } else {
-                requestPermissions(LOCATION_PERMISSIONS, LOCATION_PERMISSIONS_REQUEST_CODE);
+                if (shouldShowRequestPermissionRationale(LOCATION_PERMISSIONS[0])) {
+                    FragmentManager fragmentManager = getFragmentManager();
+                    if (fragmentManager != null) {
+                        RationaleDialogFragment fragment = RationaleDialogFragment.newInstance();
+                        fragment.setCallbacks(this);
+                        fragment.show(fragmentManager, RATIONALE_DIALOG_FRAGMENT_TAG);
+                    }
+                } else {
+                    requestPermissions(LOCATION_PERMISSIONS, LOCATION_PERMISSIONS_REQUEST_CODE);
+                }
             }
             return true;
         }
@@ -119,15 +129,12 @@ public class LocatrFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    // SOS: both FINE and COARSE permissions belong to the same group (p662), therefore I only need
-    // to check for one of them. (if one has permission, the other has too)
     private boolean hasLocationPermission() {
         assert getActivity() != null;
         int result = ContextCompat.checkSelfPermission(getActivity(), LOCATION_PERMISSIONS[0]);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    // SOS: in case of continuous updates, I'd also have to call removeLocationUpdates when I'm done.
     private void findImage() {
         LocationRequest request = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -136,9 +143,6 @@ public class LocatrFragment extends Fragment {
 
         assert getActivity() != null;
 
-        // SOS: ugh Android Studio is stupid, it requires a direct call to checkSelfPermission here...
-        // I can't just call the wrapper hasLocationPermission, nor does it see that I've already
-        // checked before I called findImage... ffs
         if (ContextCompat.checkSelfPermission(getActivity(), LOCATION_PERMISSIONS[0])
                 != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -170,6 +174,11 @@ public class LocatrFragment extends Fragment {
 
     private void setImage(Bitmap bitmap) {
         mImageView.setImageBitmap(bitmap);
+    }
+
+    @Override
+    public void userClickedOk() {
+        requestPermissions(LOCATION_PERMISSIONS, LOCATION_PERMISSIONS_REQUEST_CODE);
     }
 
     private static class SearchTask extends AsyncTask<Location, Void, Void> {
