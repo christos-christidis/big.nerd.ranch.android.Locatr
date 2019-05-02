@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -45,6 +46,7 @@ public class LocatrFragment extends Fragment implements RationaleDialogFragment.
     private static final String RATIONALE_DIALOG_FRAGMENT_TAG = "rationale_dialog";
 
     private ImageView mImageView;
+    private ProgressBar mProgressBar;
     private GoogleApiClient mClient;
 
     static LocatrFragment newInstance() {
@@ -93,6 +95,7 @@ public class LocatrFragment extends Fragment implements RationaleDialogFragment.
         View view = inflater.inflate(R.layout.fragment_locatr, container, false);
 
         mImageView = view.findViewById(R.id.image_view);
+        mProgressBar = view.findViewById(R.id.progress_bar);
 
         return view;
     }
@@ -155,6 +158,8 @@ public class LocatrFragment extends Fragment implements RationaleDialogFragment.
                         Log.i(LOG_TAG, "Got a fix: " + locationResult);
                         List<Location> locations = locationResult.getLocations();
                         if (!locations.isEmpty()) {
+                            mImageView.setImageDrawable(null);
+                            mProgressBar.setVisibility(View.VISIBLE);
                             new SearchTask(LocatrFragment.this).execute(locations.get(0));
                         }
                     }
@@ -170,10 +175,6 @@ public class LocatrFragment extends Fragment implements RationaleDialogFragment.
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-    }
-
-    private void setImage(Bitmap bitmap) {
-        mImageView.setImageBitmap(bitmap);
     }
 
     @Override
@@ -215,7 +216,8 @@ public class LocatrFragment extends Fragment implements RationaleDialogFragment.
         protected void onPostExecute(Void result) {
             LocatrFragment fragment = mFragmentRef.get();
             if (fragment != null) {
-                fragment.setImage(mBitmap);
+                fragment.mProgressBar.setVisibility(View.GONE);
+                fragment.mImageView.setImageBitmap(mBitmap);
             }
         }
     }
