@@ -1,29 +1,31 @@
 package com.bignerdranch.locatr;
 
-import android.net.Uri;
-
 class GalleryItem {
 
     private String mCaption;
-    private String mId;
     private String mUrl;
+    private double mLat;
 
-    private String mOwner;
-
-    String getCaption() {
-        return mCaption;
+    double getLat() {
+        return mLat;
     }
+
+    void setLat(double lat) {
+        mLat = lat;
+    }
+
+    double getLon() {
+        return mLon;
+    }
+
+    void setLon(double lon) {
+        mLon = lon;
+    }
+
+    private double mLon;
 
     void setCaption(String caption) {
         mCaption = caption;
-    }
-
-    String getId() {
-        return mId;
-    }
-
-    void setId(String id) {
-        mId = id;
     }
 
     String getUrl() {
@@ -32,22 +34,6 @@ class GalleryItem {
 
     void setUrl(String url) {
         mUrl = url;
-    }
-
-    public String getOwner() {
-        return mOwner;
-    }
-
-    public void setOwner(String owner) {
-        mOwner = owner;
-    }
-
-    Uri getPhotoPageUri() {
-        return Uri.parse("https://www.flickr.com/photos/")
-                .buildUpon()
-                .appendPath(mOwner)
-                .appendPath(mId)
-                .build();
     }
 
     @SuppressWarnings("NullableProblems")
